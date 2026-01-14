@@ -29,7 +29,7 @@ const Home: React.FC = () => {
               to="/register" 
               className="group relative bg-white rounded-2xl shadow-xl p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl border border-red-50 animate-card-pulse hover:animate-none"
             >
-              <div className="absolute top-0 right-0 -mt-4 -mr-4 bg-brand-600 text-white p-3 rounded-full shadow-lg animate-pulse group-hover:scale-110 transition-transform">
+              <div className="absolute top-0 right-0 -mt-4 -mr-4 bg-brand-600 text-white p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
                 <HeartHandshake size={32} />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Register as Donor</h2>

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { MOCK_DONORS, KERALA_DISTRICTS, BLOOD_GROUPS, isEligibleToDonate } from '../constants';
-import { Search as SearchIcon, Phone, MapPin, Calendar, AlertCircle } from 'lucide-react';
+import { Search as SearchIcon, Phone, MapPin, Calendar, AlertCircle, Contact } from 'lucide-react';
 import { Donor } from '../types';
 
 const Search: React.FC = () => {
@@ -67,12 +68,31 @@ const Search: React.FC = () => {
           <h2 className="text-xl font-semibold text-gray-800">Available Donors ({filteredDonors.length})</h2>
           
           {filteredDonors.length === 0 ? (
-            <div className="bg-white rounded-xl shadow p-12 text-center">
-              <div className="mx-auto h-12 w-12 text-gray-400 mb-4">
-                 <AlertCircle size={48} />
+            <div className="bg-white rounded-xl shadow-md p-10 text-center border border-gray-100">
+              <div className="mx-auto h-16 w-16 text-brand-200 mb-4 flex items-center justify-center bg-brand-50 rounded-full">
+                 <AlertCircle size={40} className="text-brand-500" />
               </div>
-              <p className="text-gray-500 text-lg">No eligible donors found matching criteria.</p>
-              <p className="text-gray-400 text-sm mt-2">Note: Donors who donated in the last 3 months are excluded.</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">No Donors Found</h3>
+              <p className="text-gray-500 text-base mb-6 max-w-lg mx-auto">
+                We couldn't find any donors matching your criteria who are currently eligible. 
+                <span className="block mt-1 text-sm text-gray-400">Note: Donors must wait 3 months between donations.</span>
+              </p>
+              
+              <div className="bg-blue-50 rounded-xl p-6 max-w-lg mx-auto border border-blue-100">
+                <h4 className="text-blue-900 font-semibold mb-2 flex items-center justify-center">
+                  <Contact className="w-5 h-5 mr-2" />
+                  In an Emergency?
+                </h4>
+                <p className="text-blue-700 text-sm mb-4">
+                  If this is a medical emergency, please check our directory for hospitals and ambulance services.
+                </p>
+                <Link 
+                  to="/directory" 
+                  className="inline-flex items-center justify-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-colors w-full sm:w-auto"
+                >
+                  View Emergency Directory
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

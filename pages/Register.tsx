@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { KERALA_DISTRICTS, BLOOD_GROUPS } from '../constants';
-import { UserPlus, Calendar, MapPin, Phone, User, Droplet } from 'lucide-react';
+import { UserPlus, Calendar, MapPin, Phone, User, Droplet, AlertCircle } from 'lucide-react';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -13,14 +13,66 @@ const Register: React.FC = () => {
     location: '',
     lastDonationDate: ''
   });
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    
+    // Clear error for this field when user types
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validate = () => {
+    const newErrors: {[key: string]: string} = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Full Name is required';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
+    }
+
+    if (!formData.phone) {
+      newErrors.phone = 'Phone Number is required';
+    } else if (!/^\d{10}$/.test(formData.phone)) {
+      newErrors.phone = 'Phone number must be exactly 10 digits';
+    }
+
+    if (!formData.bloodGroup) {
+      newErrors.bloodGroup = 'Please select a Blood Group';
+    }
+
+    if (!formData.district) {
+      newErrors.district = 'Please select a District';
+    }
+
+    if (!formData.location.trim()) {
+      newErrors.location = 'Location is required';
+    }
+
+    if (formData.lastDonationDate) {
+      const selectedDate = new Date(formData.lastDonationDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time for accurate date comparison
+      if (selectedDate > today) {
+        newErrors.lastDonationDate = 'Date cannot be in the future';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validate()) {
+      return;
+    }
+
     setLoading(true);
 
     // Simulate Backend API Call
@@ -44,7 +96,7 @@ const Register: React.FC = () => {
           </p>
         </div>
         
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit} noValidate>
           <div className="rounded-md shadow-sm space-y-4">
             
             {/* Name */}
@@ -58,13 +110,13 @@ const Register: React.FC = () => {
                   id="name"
                   name="name"
                   type="text"
-                  required
-                  className="focus:ring-brand-500 focus:border-brand-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-lg p-2.5 border"
+                  className={`focus:ring-brand-500 focus:border-brand-500 block w-full pl-10 sm:text-sm rounded-lg p-2.5 border ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
                   placeholder="Rahul Nair"
                   value={formData.name}
                   onChange={handleChange}
                 />
               </div>
+              {errors.name && <p className="mt-1 text-xs text-red-600 flex items-center"><AlertCircle className="w-3 h-3 mr-1"/>{errors.name}</p>}
             </div>
 
             {/* Phone */}
@@ -78,14 +130,14 @@ const Register: React.FC = () => {
                   id="phone"
                   name="phone"
                   type="tel"
-                  required
-                  pattern="[0-9]{10}"
-                  className="focus:ring-brand-500 focus:border-brand-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-lg p-2.5 border"
+                  className={`focus:ring-brand-500 focus:border-brand-500 block w-full pl-10 sm:text-sm rounded-lg p-2.5 border ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
                   placeholder="10 digit mobile number"
                   value={formData.phone}
                   onChange={handleChange}
+                  maxLength={10}
                 />
               </div>
+              {errors.phone && <p className="mt-1 text-xs text-red-600 flex items-center"><AlertCircle className="w-3 h-3 mr-1"/>{errors.phone}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -99,8 +151,7 @@ const Register: React.FC = () => {
                   <select
                     id="bloodGroup"
                     name="bloodGroup"
-                    required
-                    className="focus:ring-brand-500 focus:border-brand-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-lg p-2.5 border bg-white"
+                    className={`focus:ring-brand-500 focus:border-brand-500 block w-full pl-10 sm:text-sm rounded-lg p-2.5 border bg-white ${errors.bloodGroup ? 'border-red-500' : 'border-gray-300'}`}
                     value={formData.bloodGroup}
                     onChange={handleChange}
                   >
@@ -108,6 +159,7 @@ const Register: React.FC = () => {
                     {BLOOD_GROUPS.map(bg => <option key={bg} value={bg}>{bg}</option>)}
                   </select>
                 </div>
+                {errors.bloodGroup && <p className="mt-1 text-xs text-red-600 flex items-center"><AlertCircle className="w-3 h-3 mr-1"/>Required</p>}
               </div>
 
               {/* District */}
@@ -116,14 +168,14 @@ const Register: React.FC = () => {
                 <select
                   id="district"
                   name="district"
-                  required
-                  className="focus:ring-brand-500 focus:border-brand-500 block w-full sm:text-sm border-gray-300 rounded-lg p-2.5 border bg-white"
+                  className={`focus:ring-brand-500 focus:border-brand-500 block w-full sm:text-sm rounded-lg p-2.5 border bg-white ${errors.district ? 'border-red-500' : 'border-gray-300'}`}
                   value={formData.district}
                   onChange={handleChange}
                 >
                   <option value="">Select District</option>
                   {KERALA_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
+                {errors.district && <p className="mt-1 text-xs text-red-600 flex items-center"><AlertCircle className="w-3 h-3 mr-1"/>Required</p>}
               </div>
             </div>
 
@@ -138,13 +190,13 @@ const Register: React.FC = () => {
                   id="location"
                   name="location"
                   type="text"
-                  required
-                  className="focus:ring-brand-500 focus:border-brand-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-lg p-2.5 border"
+                  className={`focus:ring-brand-500 focus:border-brand-500 block w-full pl-10 sm:text-sm rounded-lg p-2.5 border ${errors.location ? 'border-red-500' : 'border-gray-300'}`}
                   placeholder="e.g. Aluva, Pala"
                   value={formData.location}
                   onChange={handleChange}
                 />
               </div>
+              {errors.location && <p className="mt-1 text-xs text-red-600 flex items-center"><AlertCircle className="w-3 h-3 mr-1"/>{errors.location}</p>}
             </div>
 
             {/* Last Donation */}
@@ -158,12 +210,14 @@ const Register: React.FC = () => {
                   id="lastDonationDate"
                   name="lastDonationDate"
                   type="date"
-                  className="focus:ring-brand-500 focus:border-brand-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-lg p-2.5 border"
+                  className={`focus:ring-brand-500 focus:border-brand-500 block w-full pl-10 sm:text-sm rounded-lg p-2.5 border ${errors.lastDonationDate ? 'border-red-500' : 'border-gray-300'}`}
                   value={formData.lastDonationDate}
                   onChange={handleChange}
+                  max={new Date().toISOString().split('T')[0]}
                 />
-                <p className="text-xs text-gray-500 mt-1">Leave blank if never donated.</p>
               </div>
+              {errors.lastDonationDate && <p className="mt-1 text-xs text-red-600 flex items-center"><AlertCircle className="w-3 h-3 mr-1"/>{errors.lastDonationDate}</p>}
+              <p className="text-xs text-gray-500 mt-1">Leave blank if never donated.</p>
             </div>
 
           </div>
